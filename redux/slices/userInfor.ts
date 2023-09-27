@@ -7,7 +7,9 @@ type User = {
   userName : string,
   phone : string,
   role: string,
-  token : number
+  token : number,
+  level : string,
+  activityPoint : number,
 };
 type AppState = {
   currentUser: User;
@@ -19,6 +21,8 @@ const initialState: AppState = {
     userName: "",
     phone:"",
     role:"",
+    level:"",
+    activityPoint:0,
     token:0
   },
 };

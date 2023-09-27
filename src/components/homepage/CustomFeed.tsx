@@ -5,14 +5,9 @@ import PostFeed from '../PostFeed'
 import { notFound } from 'next/navigation'
 import { ExtendedPost } from '@/types/db'
 
-const CustomFeed = async () => {
-  const session =   getAuthSession()
+const CustomFeed = () => {
 
-  // only rendered if session exists, so this will not happen
-  if (!session) return notFound()
-  const posts: ExtendedPost[] = [];
-
-  return <PostFeed initialPosts={posts} /> 
+  return <PostFeed/> 
 }
 
 export default CustomFeed

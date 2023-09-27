@@ -1,5 +1,5 @@
 import { Icons } from '@/components/Icons'
-import UserAuthFormRegister from './UserAuthFormRegister'
+import UserAuthFormRegister from './UserForm/UserAuthFormRegister'
 import Link from 'next/link'
 
 const SignUp = () => {

@@ -8,7 +8,7 @@ export const END_POINT = {
   REGISTER: "/auth/sign-up",
   GETOTP : "/forgot/a",
   VERIFY : "/forgot/verify-key",
-  CHANGE : "/forgot/verifykey"
+  CHANGE : "/forgot/verifykey/"
   
 };
 
@@ -69,8 +69,7 @@ export const checkOTP = (payload: CheckOTP) => {
 };
 
 export const changePassword = (payload: ChangePassword) => {
-  return axiosClient.post(END_POINT.CHANGE+payload.token, {
-       password:payload.password 
+  return axiosClient.get(END_POINT.CHANGE+payload.token+"?password="+payload.password, {
   });
 };
 

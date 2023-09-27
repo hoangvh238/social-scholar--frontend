@@ -14,23 +14,25 @@ import { changePasswordSchema } from '../../../ultils/validation';
 import InputForm from '../InputForm';
 import { registerAccount } from '../../../apis/auth';
 import { ValidationError } from 'yup';
+import { changePassword } from '../../../apis/auth';
 import axios from 'axios';
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
-const UserChangePassForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
+const UserChangePassForm: FC<UserAuthFormProps & { token: string }>  = ({ className, ...props}) => {
   type UserChangePass = {
     password: string,
-    confirmPassword: string
+    token : string,
   }
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
   const router = useRouter();
   const onSubmit = async (values: UserChangePass, actions: any) => {
     try {
-      console.log(values);
-
-      toast.success("Register success ! Check your email to validated");
-      setTimeout(() => {  router.push('/sign-in');
+      values.token = props.token;      
+      await changePassword(values)
+      toast.success("Reset password successfully !")
+      setTimeout(() => {  
+        router.push('/sign-in');
       }, 500);
     } catch (error: unknown) {
       if (error instanceof ValidationError) {

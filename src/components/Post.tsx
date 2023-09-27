@@ -1,51 +1,67 @@
-import { FC, useRef } from 'react'
+'use client'
+
 import { formatTimeToNow } from '@/lib/utils'
 import { MessageSquare } from 'lucide-react'
 import Link from 'next/link'
+import { FC, useRef } from 'react'
 import EditorOutput from './EditorOutput'
 import PostVoteClient from './post-vote/PostVoteClient'
 
+
+
 interface PostProps {
-  post: {
-    id: string;
-    title: string;
-    content: {
-      text: string;
-    };
-    createdAt: string;
-    updatedAt: string;
-    author: {
-      id: string;
-      username: string;
-    };
-    votes: {
-      type: string;
-    }[];
-  };
-  votesAmt: number;
-  subredditName: string;
-  currentVote?: {
-    type: string;
-  };
-  commentAmt: number;
+  post: CurrPost
+  votesAmt: number
+  subredditName: string
+  currentVote?: Like
+  commentAmt: number
+}
+
+type Like = {
+  author : string,
+  likeId : number,
+  status : number , 
+  time : Date
+}   
+
+type CurrPost = { 
+  
+  postId : number,
+  content : string,
+  time : Date,
+  imageURL : string,
+  author : string,
+  groupName : string,
+  comments : Comment[],
+  reports : [],
+}
+type Comment = { 
+  commentId: number,
+  postId : number,
+  commentParentId : number;
+  content: string,
+  time: Date,
+  author : string,
+  reports: [],
+  likes: Like[]
 }
 
 const Post: FC<PostProps> = ({
   post,
-  votesAmt,
-  currentVote,
+  votesAmt: _votesAmt,
+  currentVote: _currentVote,
   subredditName,
   commentAmt,
 }) => {
-  const pRef = useRef<HTMLParagraphElement>(null)
+  // const pRef = useRef<HTMLParagraphElement>(null)
 
   return (
     <div className='rounded-md bg-white shadow'>
       <div className='px-6 py-4 flex justify-between'>
         <PostVoteClient
-          postId={post.id}
-          initialVotesAmt={votesAmt}
-          initialVote={currentVote?.type}
+          postId={post.postId}
+          initialVotesAmt={_votesAmt}
+          initialVote={_currentVote}
         />
 
         <div className='w-0 flex-1'>
@@ -60,16 +76,16 @@ const Post: FC<PostProps> = ({
                 <span className='px-1'>•</span>
               </>
             ) : null}
-            <span>Posted by u/{post.author.username}</span>{' '}
-            {formatTimeToNow(new Date(post.createdAt))}
+            <span>Posted by u/{post.author}</span>{' '}
+            {formatTimeToNow(new Date(post.time))}
           </div>
-          <a href={`/r/${subredditName}/post/${post.id}`}>
+          <a href={`/r/${subredditName}/post/${post.author}`}>
             <h1 className='text-lg font-semibold py-2 leading-6 text-gray-900'>
-              {post.title}
+              {/* {post.content} */} POST
             </h1>
           </a>
 
-          <div
+          {/* <div
             className='relative text-sm max-h-40 w-full overflow-clip'
             ref={pRef}>
             <EditorOutput content={post.content} />
@@ -77,13 +93,13 @@ const Post: FC<PostProps> = ({
               // blur bottom if content is too long
               <div className='absolute bottom-0 left-0 h-24 w-full bg-gradient-to-t from-white to-transparent'></div>
             ) : null}
-          </div>
+          </div> */}
         </div>
       </div>
 
       <div className='bg-gray-50 z-20 text-sm px-4 py-4 sm:px-6'>
         <Link
-          href={`/r/${subredditName}/post/${post.id}`}
+          href={`/r/${subredditName}/post/${post.postId}`}
           className='w-fit flex items-center gap-2'>
           <MessageSquare className='h-4 w-4' /> {commentAmt} comments
         </Link>
@@ -91,5 +107,4 @@ const Post: FC<PostProps> = ({
     </div>
   )
 }
-
 export default Post

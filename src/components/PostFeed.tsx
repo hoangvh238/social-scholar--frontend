@@ -1,125 +1,94 @@
 "use client"
 import { INFINITE_SCROLL_PAGINATION_RESULTS } from '@/config'
-import axios from 'axios'
+import { useIntersection } from '@mantine/hooks'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { FC, useEffect, useRef, useState } from 'react'
 import Post from './Post'
+import { useSession } from 'next-auth/react'
+import { getAllPost } from '../../apis/posts'
+import { ValidationError } from 'yup'
+import { toast } from 'react-toastify'
+import axios from 'axios'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../redux/store'
 
-interface PostFeedProps {
-  initialPosts: ExtendedPost[]
-  subredditName?: string
+
+type Posts = {
+   posts : CurrPost[]
 }
 
-interface ExtendedPost {
-  votes: any
-  comments: any
-  subreddit: any
-  id: string;
-  // Thêm các trường khác của ExtendedPost tại đây
+type CurrPost = { 
+  postId : number,
+  content : string,
+  time : Date,
+  imageURL : string,
+  author : string,
+  groupName : string,
+  comments : Comment[],
+  reports : [],
+  likes : Like[]
 }
 
-const PostFeed: FC<PostFeedProps> = ({ initialPosts, subredditName }) => {
-  const [posts, setPosts] = useState<ExtendedPost[]>(initialPosts)
-  const [isLoading, setIsLoading] = useState(false)
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
-  const lastPostRef = useRef<HTMLLIElement | null>(null)
+type Comment = { 
+  commentId: number,
+  postId : number,
+  commentParentId : number;
+  content: string,
+  time: Date,
+  author : string,
+  reports: [],
+  likes: Like[]
+}
 
-  const fetchMorePosts =  () => {
-    if (isLoading || !hasMore) return
+type Like = {
+  author : string,
+  likeId : number,
+  status : number , 
+  time : Date
+}   
 
-    setIsLoading(true)
+const PostFeed = () => {
+  const [posts, setPosts] = useState<Posts>({ posts: [] });
+  const user = useSelector((state: RootState) => state.userInfor.currentUser.userName);
 
+  const fetchPost = async () => {
     try {
-      const query = `/api/posts?limit=${INFINITE_SCROLL_PAGINATION_RESULTS}&page=${page}` +
-        (!!subredditName ? `&subredditName=${subredditName}` : '')
+      const postData = await getAllPost();
+      setPosts({ posts: postData.data });
+    } catch (error: unknown) {
 
-      const { data } =  axios.get(query)
-      const newPosts = data as ExtendedPost[]
-
-      if (newPosts.length > 0) {
-        setPosts([...posts, ...newPosts])
-        setPage(page + 1)
-      } else {
-        setHasMore(false)
-      }
-    } catch (error) {
-      console.error('Error fetching more posts:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-    if (entries[0].isIntersecting) {
-      fetchMorePosts()
     }
   }
 
   useEffect(() => {
-    const observer = new IntersectionObserver(handleIntersection)
-    if (lastPostRef.current) {
-      observer.observe(lastPostRef.current)
-    }
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [])
+    fetchPost();
+  }, []);
 
   return (
     <ul className='flex flex-col col-span-2 space-y-6'>
-      {posts.map((post, index) => {
-        const votesAmt = post.votes.reduce((acc: number, vote: { type: string }) => {
-          if (vote.type === 'UP') return acc + 1
-          if (vote.type === 'DOWN') return acc - 1
+      {posts.posts.map((post, index) => {
+        const votesAmt = post.likes.reduce((acc, vote) => {
+          if (vote.status === 1) return acc + 1
+          if (vote.status === -1) return acc - 1
           return acc
         }, 0)
 
-        // Sử dụng dữ liệu mẫu cho currentVote
-        const currentVote = {
-          userId: "1", //session?.user.id
-          type: "UP", // Hoặc "DOWN" hoặc "OTHER"
-        }
+        const currentVote = post.likes.find(
+          (vote) => vote.author === user
+        )
 
-        if (index === posts.length - 1) {
-          return (
-            <li key={post.id} ref={lastPostRef}>
-              {/* <Post
-                post={post}
-                commentAmt={post.comments.length}
-                subredditName={post.subreddit.name}
-                votesAmt={votesAmt}
-                currentVote={currentVote}
-              /> */}
-            </li>
-          )
-        } else {
-          return (
-            // <Post
-            //   key={post.id}
-            //   post={post}
-            //   commentAmt={post.comments.length}
-            //   subredditName={post.subreddit.name}
-            //   votesAmt={votesAmt}
-            //   currentVote={currentVote}
-            // />
-            <></>
-          )
-        }
+        return (
+          <Post
+            key={post.postId}
+            post={post}
+            commentAmt={post.comments.length}
+            subredditName={post.groupName}
+            votesAmt={votesAmt}
+            currentVote={currentVote}
+          />
+        )
       })}
-
-      {isLoading && (
-        <li className='flex justify-center'>
-          <Loader2 className='w-6 h-6 text-zinc-500 animate-spin' />
-        </li>
-      )}
-
-      {!isLoading && !hasMore && (
-        <li className='flex justify-center text-gray-500'>
-          No more posts to load.
-        </li>
-      )}
     </ul>
   )
 }

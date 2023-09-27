@@ -30,20 +30,23 @@ type TOKEN = {
 const UserOTPForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isFillOTP,setIsFillOTP] = React.useState<boolean>(true)
+  const [token,SetToken] = useState<TOKEN["token"]>("");
   const dispatch = useDispatch();
   const router = useRouter();
 
+  const HandleSetToken = (value:string) =>{
+      SetToken(value);
+  }
 
   const onSubmit = async (values: OTP, actions: any) => {
 
-    try {  
+    try { 
       values.email = getCookie("resetEmail") || "" ;
-      let token = await checkOTP(values);
-      console.log(token.data);
+      let verifyToken = await checkOTP(values) || "";
+      HandleSetToken(verifyToken.data.data); 
       
       setTimeout(() => { 
-      //   setIsFillOTP(false);
-      // console.log(values);
+        setIsFillOTP(false)
       toast.success("Validated OTP success !");
       }, 500);
     } catch (error: unknown) {
@@ -99,7 +102,7 @@ const UserOTPForm: FC<UserAuthFormProps> = ({ className, ...props }) => {
            
           </Form>
         )}
-      </Formik> : <UserChangePassForm></UserChangePassForm>}
+      </Formik> : <UserChangePassForm token={token}></UserChangePassForm>}
     </div>
   )
 }

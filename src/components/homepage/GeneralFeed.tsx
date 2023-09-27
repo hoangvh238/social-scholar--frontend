@@ -3,7 +3,7 @@ import PostFeed from '../PostFeed'
 import { INFINITE_SCROLL_PAGINATION_RESULTS } from '@/config'
 import { ExtendedPost } from '@/types/db';
 
-const GeneralFeed = async () => {
+const GeneralFeed = () => {
   // const posts =   db.post.findMany({
   //   orderBy: {
   //     createdAt: 'desc',
@@ -17,9 +17,7 @@ const GeneralFeed = async () => {
   //   take: INFINITE_SCROLL_PAGINATION_RESULTS, // 4 to demonstrate infinite scroll, should be higher in production
   // })
 
- const posts: ExtendedPost[] =[];
-
-  return <PostFeed initialPosts={posts} />
+  return <PostFeed/>
 }
 
 export default GeneralFeed

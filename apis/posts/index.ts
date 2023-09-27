@@ -1,48 +1,50 @@
-// import axiosClient from "../../ultils/axiosClient/index";
-// import { ValidationError } from "yup";
-// import {toast} from "react-toastify"
-// import axios from "axios";
+import axiosClient from "../../ultils/axiosClient/index";
+import { ValidationError } from "yup";
+import {toast} from "react-toastify"
+import axios from "axios";
 
-// export const END_POINT = {
-//   GETPOST: "/api/postservices/getPost",
-//   DELETEPOST: "/api/postservices/deletepost/{postId}",
-//   EDITPOST: "/api/postservices/editpost",
-//   POSTING : "/api/postservices/posting"
-// };
+export const END_POINT = {
+  GET_ALL_POST: "/api/postservices/getPost",
+  DELETEPOST: "/api/postservices/deletepost/{postId}",
+  EDITPOST: "/api/postservices/editpost",
+  POSTING : "/api/postservices/posting"
+};
 
 
-// type Post = { 
+type Post = { 
   
-//    postId : number,
-//    content : string,
-//    time : Date,
-//    imageURL : string
-// }
+   postId : number,
+   content : string,
+   time : Date,
+   imageURL : string,
+   author : string,
+   groupName : string,
+   comments : Comment[],
+   reports : [],
+   likes : Like[]
 
-// type Posting = { 
-//    Post : Post,
-    
-// }
+}
+
+type Comment = { 
+  commentId: number,
+  postId : number,
+  commentParentId : number;
+  content: string,
+  time: Date,
+  author : string,
+  reports: [],
+  likes: Like[]
+}
+
+type Like = {
+    likeId : number,
+    status : number , 
+    time : Date
+}   
 
 
 
-// export const getPost = () => {
-//   return axiosClient.get<LoginResponse>(END_POINT.GETPOST, {
-//   });
-// };
-// export const deletePost = (payload: UserRegister) => {
-//   return axiosClient.post(END_POINT.REGISTER, {
-//     email: payload.email,
-//     password: payload.password,
-//     userName : payload.userName
-//   });
-// };
-
-// export const resetAccount = (payload: UserChange) => {
-//   return axiosClient.patch(END_POINT.RESET, {
-//     email : payload.email,
-//     oldPassword: payload.oldPassword,
-//     newPassword: payload.newPassword
-//   });
-// };
-
+export const getAllPost = () => {
+  return axiosClient.get(END_POINT.GET_ALL_POST, {
+  });
+};
